@@ -1,0 +1,42 @@
+{%	load	staticfiles	%}
+<html>
+    <head>
+        <title>gestione conto</title>
+        <link	rel="stylesheet"	href="{%	static	'css/style.css'	%}">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <header>
+            <h1>gestione conto</h1>
+        </header>
+        <section>
+            <div id="manager">
+                {% block mostraManager %}
+                {% endblock %}
+            </div>
+        </section>
+        <section>
+            <div class="side1">
+                {% block mostraConto %}
+                {% endblock %}
+                {% block operazioniConto %}
+                {% endblock %}
+            </div>
+            <div class="main">
+                {% block mostraContenuti %}
+                {% endblock %}
+            </div>
+            <div class="side2">
+                {% block operazioniTransazione %}
+                {% endblock %}
+                {% block mostraFiltri %}
+                {% endblock %}
+            </div>
+        </section>
+        <footer>
+            <h1>footer</h1>
+            
+        </footer>
+    </body>
+</html>

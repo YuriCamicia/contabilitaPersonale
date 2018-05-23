@@ -1,0 +1,26 @@
+{% extends 'contoPersonale/base.html' %}
+
+
+{% block mostraManager %}
+    <p>cambia conto</p>
+
+    <form	method="POST">{%	csrf_token	%}
+        {{	form1.as_p	}}
+        <button	type="submit">Ok</button>
+    </form>
+
+    <!--
+
+    <form method="POST">{%	csrf_token	%}
+        <select>
+            <option>-- scegli --</option>
+            {% for conto in conti %}
+                <option>{{conto.nome}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="ok">
+    </form>
+    -->
+    <p>aggiungi nuovo conto</p>
+    <br/>
+{% endblock %}

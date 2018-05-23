@@ -1,0 +1,104 @@
+{% extends 'contoPersonale/base.html' %}
+
+{% block mostraManager %}
+    <p><a href="{% url 'start' %}">cambia conto</a></p>
+    <p>aggiungi nuovo conto</p>
+    <br/>
+{% endblock %}
+
+{% block mostraConto %}
+
+    
+        <div>
+            <p>{{conto.nome}}</p>
+            <p>
+                {% if conto.tipo == 'CC' %}
+                    <span>Conto Corrente</span>
+                {% else %}
+                    <span>Conto Risparmio</span>
+                {% endif %}
+            </p>
+            <p>&euro;{{conto.saldo}}</p>
+        </div>
+        <br/>
+   
+
+{% endblock %}
+
+
+{% block operazioniConto %}
+    
+    <div>
+        <h3>Operazioni sul conto</h3><br/>
+        <p>modifica saldo</p>
+        <p>rimozione conto</p>
+    </div>
+
+{% endblock %}
+
+
+
+{% block mostraContenuti %}
+    <h3>
+        Transazioni
+        {% if periodicitaTransazione == 'VAR' %}
+            variabili
+        {% else %}
+            fisse
+        {% endif %}
+    </h3><br/>
+    <h4>Totale &euro; {{importo_totale}}</h4><br/>
+    
+    {% for transazione in transazioni %}
+          
+        
+            <div>
+                <p>{{transazione.data}}</p>
+                <p>
+                    &euro;
+                    {% if transazione.tipo == 'OUT' %}
+                        <span class="transazioneOUT">-{{transazione.importo}}</span>
+                    {% else %}
+                        <span class="transazioneIN">+{{transazione.importo}}</span>
+                    {% endif %}
+                </p>
+                <p>{{transazione.descrizione}}</p>
+                <p>{{transazione.periodicita}}</p>
+                <p>{{transazione.conto_ref}}</p>
+            </div>
+            <br/>
+        
+    {% endfor %}
+    
+{% endblock %}
+
+{% block operazioniTransazione %}
+    
+    <div>
+        <h3>Operazioni sulle transazioni</h3><br/>
+        <p>aggiunta nuova transazione</p>
+        <p>modifica transazione</p>
+        <p>rimozione transazione</p>
+    </div>
+
+{% endblock %}
+
+{% block mostraFiltri %}
+    <div>
+        <br/><h3>Filtra per</h3><br/>
+        <form	method="POST">{%	csrf_token	%}
+            {{	form2.as_p	}}
+            <button	type="submit">Ok</button>
+        </form>
+        <!--<form>
+            <p>
+                <label for="transazioneVAR">transazioni variabili</label>
+                <input type="radio" id="transazioneVAR" name="tipo_transazione" value="VAR">
+            </p>
+            <p>
+                <label for="transazioneFIS">transazioni fisse</label>
+                <input type="radio" id="transazioneFIS" name="tipo_transazione" value="FIS">        
+            </p>
+        </form>-->
+    </div>
+{% endblock %}

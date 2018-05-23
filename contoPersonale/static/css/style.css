@@ -1,0 +1,24 @@
+@import 'reset.css';
+
+header, footer{
+    min-height:50px;
+}
+
+section{
+    display: flex;
+}
+
+.side1, .side2{
+    flex:1 0 6rem;
+}
+
+.main{
+    flex:2;
+    min-height:400px;
+}
+
+@media (max-width:800px){
+    section{
+        display: block;
+    }
+}
