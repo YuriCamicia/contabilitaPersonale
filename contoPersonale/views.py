@@ -5,27 +5,24 @@ from .forms	import	managerForm, sceltaTransazioneForm
 
 
 def gestione_conto(request, pk):
-    
     conto = get_object_or_404(Conto, pk=pk)
-    transazioni = Transazione.objects.filter(conto_ref=conto).filter(periodicita='VAR').order_by('data')
     periodicitaTransazione= 'VAR'
+    transazioni = Transazione.objects.filter(conto_ref=conto).filter(periodicita=periodicitaTransazione).order_by('-data')
     if	request.method	==	"POST":
         form2	=	sceltaTransazioneForm(request.POST)
-        
         if	form2.is_valid():
             periodicitaTransazione = form2.cleaned_data['periodicita']
-            if(periodicitaTransazione=='VAR'):
-                transazioni = Transazione.objects.filter(conto_ref=conto).filter(periodicita='VAR').order_by('data')
-            else:
-                transazioni = Transazione.objects.filter(conto_ref=conto).filter(periodicita='FIS').order_by('data')
+            transazioni = Transazione.objects.filter(conto_ref=conto).order_by('-data')
+            transazioni = Transazione.recuperoTransazioniPerPeriodicita(transazioni,periodicitaTransazione)
+            #transazioni = transazioni.filter(periodicita=periodicitaTransazione).order_by('-data')
     else:
         form2 = sceltaTransazioneForm()    
     importo_totale = 0
     for transazione in transazioni:
-        if(transazione.tipo=='IN'):
-            importo_totale += transazione.importo
-        else:
+        if(transazione.tipo=='OUT'):
             importo_totale -= transazione.importo
+        else:
+            importo_totale += transazione.importo
     return render(request,'contoPersonale/gestione_conto.html', { 'conto':conto, 'transazioni':transazioni ,'form2':form2, 'periodicitaTransazione':periodicitaTransazione, 'importo_totale':importo_totale} )
 
 
