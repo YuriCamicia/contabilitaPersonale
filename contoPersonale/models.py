@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.db.models.signals import post_save, pre_save, pre_delete
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 
 '''
@@ -11,8 +11,10 @@ Legenda:
 
 class Conto(models.Model):
     nome = models.CharField(max_length=200)
-    saldo = models.DecimalField(max_digits=19, decimal_places=2)
-    
+    saldo_iniziale = models.DecimalField(max_digits=19, decimal_places=2)
+    tot_transazioni = models.DecimalField(max_digits=19, decimal_places=2, default=0 )
+    saldo_attuale = models.DecimalField(max_digits=19, decimal_places=2, default=0)
+    #saldo_attuale = saldo + tot_transazioni
 
     CONTO_CORRENTE = 'CC'
     CONTO_RISPARMIO = 'CR'
@@ -82,74 +84,51 @@ class Transazione(models.Model):
         return self.descrizione
 
 
+
+@receiver(pre_save, sender=Conto)
+def salva_conto(sender, **kwargs):
+    #if kwargs.get('created', False):
+    instance = kwargs.get('instance')
+    saldo_iniziale = instance.saldo_iniziale
+    tot_transazioni = instance.tot_transazioni
+    saldo_attuale = saldo_iniziale + tot_transazioni
+    instance.saldo_attuale = saldo_attuale
+
+
 @receiver(post_save, sender=Transazione)
-def salva_nuova_transazione(sender, **kwargs):
-    if kwargs.get('created', False):
-        instance = kwargs.get('instance')
-        #prendo il riferimento al conto per pk
-        conto_rifer = Conto.objects.get(pk = instance.conto_ref.id )
-        #aggiorno il saldo in base al tipo di transazione
-        if(instance.tipo=='OUT'):
-            conto_rifer.saldo -= instance.importo
+def salva_modifica_transazione(sender, **kwargs):
+    instance = kwargs.get('instance')
+    #prendo il riferimento al conto per pk
+    conto_rifer = Conto.objects.get(pk = instance.conto_ref.id )
+    transazioni = Transazione.objects.filter(conto_ref=conto_rifer)
+    #aggiorno il saldo in base al tipo di transazione
+    importo_totale = 0
+    for transazione in transazioni:
+        if(transazione.tipo=='OUT'):
+            importo_totale -= transazione.importo
         else:
-            conto_rifer.saldo += instance.importo
-        #salvo il nuovo saldo della classe conto
-        conto_rifer.save()
+            importo_totale += transazione.importo
+    #salvo il nuovo saldo della classe conto
+    conto_rifer.tot_transazioni = importo_totale
+    conto_rifer.save()
 
-'''
-Post save seconda implementazione
 
-@receiver(post_save, sender=Transazione)
-def salva_nuova_transazione(sender, **kwargs):
-    if kwargs.get('created', False):
-        instance = kwargs.get('instance')
-        #prendo il riferimento al conto per pk
-        conto_rifer = Conto.objects.get(pk = instance.conto_ref.id )
-        transazioni = Transazione.objects.filter(conto_ref=conto)
-        #aggiorno il saldo in base al tipo di transazione
-        importo_totale = 0
-        for transazione in transazioni:
-            if(transazione.tipo=='OUT'):
-                importo_totale -= transazione.importo
-            else:
-                importo_totale += transazione.importo
-        #salvo il nuovo saldo della classe conto
-        conto_rifer.tot_transazioni = importo_totale
-        conto_rifer.save()
-'''
-
-@receiver(pre_delete, sender=Transazione)
+@receiver(post_delete, sender=Transazione)
 def elimina_transazione(sender, **kwargs):
     instance = kwargs.get('instance')
     #prendo il riferimento al conto per pk
     conto_rifer = Conto.objects.get(pk = instance.conto_ref.id )
-    #riassegno il saldo prima dell'eliminazione della transazione in base al tipo
-    #se OUT incremento il saldo
-    #se IN decremento il saldo
-    if(instance.tipo=='OUT'):
-        conto_rifer.saldo += instance.importo
-    else:
-        conto_rifer.saldo -= instance.importo
+    transazioni = Transazione.objects.filter(conto_ref=conto_rifer)
+    #aggiorno il saldo in base al tipo di transazione
+    importo_totale = 0
+    for transazione in transazioni:
+        if(transazione.tipo=='OUT'):
+            importo_totale -= transazione.importo
+        else:
+            importo_totale += transazione.importo
     #salvo il nuovo saldo della classe conto
+    conto_rifer.tot_transazioni = importo_totale
     conto_rifer.save()
 
 
 
-'''
-
-@receiver(pre_save, sender=Transazione)
-def modifica_transazione(sender, **kwargs):
-    instance = kwargs.get('instance')
-    
-    #prendo il riferimento al conto per pk
-    conto_rifer = Conto.objects.get(pk = instance.conto_ref.id )
-    #riassegno il saldo prima della modifica della transazione in base al tipo
-    #se OUT incremento il saldo
-    #se IN decremento il saldo
-    if(instance.tipo=='OUT'):
-        conto_rifer.saldo += instance.importo
-    else:
-        conto_rifer.saldo -= instance.importo
-    #salvo il nuovo saldo della classe conto
-    conto_rifer.save()
-'''
