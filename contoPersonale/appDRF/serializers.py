@@ -5,7 +5,7 @@ from rest_framework import serializers
 class ContoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Conto
-        fields = ('nome', 'saldo', 'url')
+        fields = ('nome', 'saldo_iniziale', 'tot_transazioni', 'saldo_attuale' , 'url')
 
 class TransazioneSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

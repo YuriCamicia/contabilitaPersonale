@@ -7,14 +7,15 @@ from django.dispatch import receiver
 Legenda:
     class Conto:
         tipo = scelta multipla tra conto corrente e risparmio
+        saldo_attuale = saldo + tot_transazioni
 '''
 
 class Conto(models.Model):
     nome = models.CharField(max_length=200)
     saldo_iniziale = models.DecimalField(max_digits=19, decimal_places=2)
-    tot_transazioni = models.DecimalField(max_digits=19, decimal_places=2, default=0 )
-    saldo_attuale = models.DecimalField(max_digits=19, decimal_places=2, default=0)
-    #saldo_attuale = saldo + tot_transazioni
+    tot_transazioni = models.DecimalField(max_digits=19, decimal_places=2, default=0, editable=False )
+    saldo_attuale = models.DecimalField(max_digits=19, decimal_places=2, default=0, editable=False)
+    
 
     CONTO_CORRENTE = 'CC'
     CONTO_RISPARMIO = 'CR'
